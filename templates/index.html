@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Sender - Avatar Agentic AI</title>
+    <title>Avatar Agentic AI - Terminal</title>
     <style>
         body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #e5ddd5; }
         .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 420px; }
@@ -14,31 +14,28 @@
         button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; }
         .btn-send { background: #25D366; color: white; }
         .btn-clear { background: #f0f0f0; color: #555; }
-        .debug-section { border-top: 1px solid #eee; padding-top: 15px; }
-        .debug-box { width: 100%; height: 100px; background: #1e1e1e; color: #00ff00; font-family: 'Courier New', monospace; font-size: 11px; padding: 10px; border-radius: 5px; border: none; resize: none; }
+        .received-section { border-top: 1px solid #eee; padding-top: 15px; }
+        .received-box { width: 100%; height: 150px; background: #f9f9f9; color: #333; font-family: monospace; font-size: 13px; padding: 10px; border-radius: 5px; border: 1px solid #ddd; resize: none; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>WhatsApp Sender</h2>
+        <h2>Avatar Agentic AI</h2>
         <form action="/manual-send" method="post">
             <label>To Phone</label>
-            <input type="text" name="to_phone" value="{{ last_to or '' }}" placeholder="e.g. 6597890305" required>
-
+            <input type="text" name="to_phone" placeholder="65xxxxxxxx" required>
             <label>Message Text</label>
-            <textarea name="message" rows="4" required>{{ last_msg or '' }}</textarea>
-
+            <textarea name="message" rows="3" required></textarea>
             <div class="btn-group">
                 <button type="submit" class="btn-send">Send</button>
                 <button type="reset" class="btn-clear" onclick="window.location.href='/'">Clear</button>
             </div>
         </form>
-
-        <div class="debug-section">
-            <label>Debug Messages:</label>
-            <textarea class="debug-box" readonly>{{ debug_msg }}</textarea>
+        <div class="received-section">
+            <label>Messages Received:</label>
+            <textarea class="received-box" readonly>{{ received_content }}</textarea>
         </div>
-        <p style="text-align: center; font-size: 10px; color: #999;">Sender Number: {{ sender }}</p>
+        <p style="text-align: center; font-size: 10px; color: #999; margin-top: 10px;">Connected to: {{ sender }}</p>
     </div>
 </body>
 </html>

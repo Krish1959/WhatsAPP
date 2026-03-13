@@ -1,4 +1,5 @@
 import os
+import traceback
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -10,8 +11,8 @@ templates = Jinja2Templates(directory="templates")
 
 # Configuration
 SENDER_PHONE = "+6588531385"
-# We'll use a simple list to store the last few received messages for the UI
-received_messages = []
+chat_history = []
+last_debug_info = "System initialized."
 
 wa = WhatsApp(
     phone_id=os.getenv("WA_PHONE_ID"),
@@ -23,30 +24,46 @@ wa = WhatsApp(
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    # Join received messages into a single string for the text box
-    messages_display = "\n".join(received_messages) if received_messages else "No messages received yet."
+    chat_display = "\n".join(chat_history) if chat_history else ""
     return templates.TemplateResponse("index.html", {
         "request": request, 
         "sender": SENDER_PHONE,
-        "received_content": messages_display
+        "chat_content": chat_display,
+        "debug_msg": last_debug_info
     })
 
 @app.post("/manual-send")
 async def manual_send(to_phone: str = Form(...), message: str = Form(...)):
+    global last_debug_info
     target = "".join(filter(str.isdigit, to_phone))
-    wa.send_message(to=target, text=message)
-    # Redirect back home to see the updated UI
+    try:
+        wa.send_message(to=target, text=message)
+        # Append OUT message
+        chat_history.append(f"OUT ({target}): {message}")
+        last_debug_info = f"SUCCESS: Sent to {target}"
+    except Exception as e:
+        last_debug_info = f"SEND ERROR: {str(e)}"
+    
+    return HTMLResponse("<script>window.location.href='/';</script>")
+
+@app.post("/clear")
+async def clear_chat():
+    global chat_history
+    chat_history = []
     return HTMLResponse("<script>window.location.href='/';</script>")
 
 @wa.on_message()
 def handle_incoming(client: WhatsApp, msg: Message):
-    """This triggers when YOU text the bot"""
-    display_text = f"From {msg.from_user.wa_id}: {msg.text}"
-    
-    # Add to our UI list (keep last 10)
-    received_messages.insert(0, display_text)
-    if len(received_messages) > 10:
-        received_messages.pop()
+    global last_debug_info
+    try:
+        # Added New Line and Phone Number Prefix
+        sender_number = msg.from_user.wa_id
+        incoming_text = f"\nIN ({sender_number}): {msg.text}"
         
-    # The 'Echo' - The bot replies to you automatically
-    msg.reply_text(f"Avatar Agentic AI received: {msg.text}")
+        chat_history.append(incoming_text)
+        last_debug_info = f"New message from {sender_number}"
+        
+        # Auto-reply Echo
+        msg.reply_text(f"Avatar Agentic AI received: {msg.text}")
+    except Exception as e:
+        last_debug_info = f"WEBHOOK ERROR: {str(e)}"

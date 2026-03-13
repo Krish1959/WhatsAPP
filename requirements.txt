@@ -1,4 +1,16 @@
-# Core Frameworks (Pinned for 2026 Stability)
+# Web Server & UI
+fastapi==0.110.0
+uvicorn[standard]==0.27.1
+jinja2>=3.1.0
+aiofiles>=23.2.1
+python-multipart==0.0.9
+requests>=2.32.5
+
+# WhatsApp Framework
+pywa==3.9.0
+python-dotenv==1.0.1
+
+# Agentic AI Stack (2026 Stable)
 langchain==1.2.12
 langchain-core==1.2.18
 langchain-community==0.4.1
@@ -7,16 +19,7 @@ langgraph-checkpoint==4.0.1
 langgraph-prebuilt==1.0.8
 pydantic==2.12.5
 
-# Web & WhatsApp
-fastapi==0.110.0
-uvicorn[standard]==0.27.1
-# Loosened requests to allow LangChain to set the version
-requests>=2.32.5
-python-multipart==0.0.9
-python-dotenv==1.0.1
-pywa==3.9.0
-
-# LLM Providers
+# AI Providers
 langchain-google-genai>=4.2.1
 google-genai>=1.60.0
 openai>=1.50.0

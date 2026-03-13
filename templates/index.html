@@ -1,1 +1,37 @@
-Index file
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar Agentic AI - Sender</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #e5ddd5; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); width: 100%; max-width: 380px; }
+        h2 { color: #075e54; margin-top: 0; text-align: center; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
+        input, textarea { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .btn-group { display: flex; gap: 12px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: opacity 0.2s; }
+        .btn-send { background: #25D366; color: white; }
+        .btn-clear { background: #f0f0f0; color: #555; }
+        button:hover { opacity: 0.8; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>WhatsApp Sender</h2>
+        <form action="/manual-send" method="post">
+            <label>To Phone</label>
+            <input type="text" name="to_phone" placeholder="e.g. 6597890305" required>
+
+            <label>Message Text</label>
+            <textarea name="message" rows="4" placeholder="Enter your message here..." required></textarea>
+
+            <div class="btn-group">
+                <button type="submit" class="btn-send">Send</button>
+                <button type="reset" class="btn-clear">Clear</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

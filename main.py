@@ -1,68 +1,52 @@
 import os
-import traceback
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pywa import WhatsApp
+from pywa.types import Message
 
 app = FastAPI()
-
-# Configuration pulled from your Render Environment
-SENDER_PHONE = "+6588531385"
 templates = Jinja2Templates(directory="templates")
 
-# Initialize WhatsApp Client
-try:
-    wa = WhatsApp(
-        phone_id=os.getenv("WA_PHONE_ID"),
-        token=os.getenv("WA_TOKEN"),
-        verify_token=os.getenv("WA_VERIFY_TOKEN"),
-        server=app,
-        webhook_endpoint="/webhook",
-    )
-except Exception as e:
-    print(f"CRITICAL: WhatsApp Init Failed: {e}")
+# Configuration
+SENDER_PHONE = "+6588531385"
+# We'll use a simple list to store the last few received messages for the UI
+received_messages = []
+
+wa = WhatsApp(
+    phone_id=os.getenv("WA_PHONE_ID"),
+    token=os.getenv("WA_TOKEN"),
+    verify_token=os.getenv("WA_VERIFY_TOKEN"),
+    server=app,
+    webhook_endpoint="/webhook",
+)
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    """Serves the manual messaging UI"""
+    # Join received messages into a single string for the text box
+    messages_display = "\n".join(received_messages) if received_messages else "No messages received yet."
     return templates.TemplateResponse("index.html", {
         "request": request, 
         "sender": SENDER_PHONE,
-        "debug_msg": "System Ready. Waiting for input..."
+        "received_content": messages_display
     })
 
-@app.post("/manual-send", response_class=HTMLResponse)
-async def manual_send(request: Request, to_phone: str = Form(...), message: str = Form(...)):
-    """Handles the form submission and provides debug feedback"""
-    debug_log = ""
-    try:
-        # Clean up phone number: remove '+' and spaces
-        target = "".join(filter(str.isdigit, to_phone))
-        debug_log += f"Processing target: {target}\n"
-        
-        # Attempt to send via WhatsApp Cloud API
-        # Using pywa's send_message method
-        response = wa.send_message(to=target, text=message)
-        
-        debug_log += f"SUCCESS! Message ID: {response}\n"
-    except Exception as e:
-        # Capture the specific error from Meta/Python for the UI
-        debug_log += f"FAILED: {str(e)}\n"
-        # Adds the specific line number where it failed
-        debug_log += f"\nFull Traceback:\n{traceback.format_exc()}"
-
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "sender": SENDER_PHONE,
-        "debug_msg": debug_log,
-        "last_to": to_phone,
-        "last_msg": message
-    })
+@app.post("/manual-send")
+async def manual_send(to_phone: str = Form(...), message: str = Form(...)):
+    target = "".join(filter(str.isdigit, to_phone))
+    wa.send_message(to=target, text=message)
+    # Redirect back home to see the updated UI
+    return HTMLResponse("<script>window.location.href='/';</script>")
 
 @wa.on_message()
-def handle_incoming(client: WhatsApp, msg):
-    """Echo logic for incoming messages"""
-    print(f"Incoming from {msg.from_user.wa_id}: {msg.text}")
-    msg.reply_text(f"Avatar Agentic AI received: {msg.text}")
+def handle_incoming(client: WhatsApp, msg: Message):
+    """This triggers when YOU text the bot"""
+    display_text = f"From {msg.from_user.wa_id}: {msg.text}"
     
+    # Add to our UI list (keep last 10)
+    received_messages.insert(0, display_text)
+    if len(received_messages) > 10:
+        received_messages.pop()
+        
+    # The 'Echo' - The bot replies to you automatically
+    msg.reply_text(f"Avatar Agentic AI received: {msg.text}")
